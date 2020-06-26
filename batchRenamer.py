@@ -1,15 +1,20 @@
 ####################################
 # Maya Batch Renamer by Rassoul Edji
+# Version 1.0
 ####################################
 
 from maya import cmds
 import maya.api.OpenMaya as om
 
+# Suffix dictionairy
 SUFFIXES = {
     "mesh": "GEO",
     "joint": "JNT",
     "camera": None,
-    "ambientLight": "LGT"
+    "ambientLight": "LGT",
+    "directionalLight": "LGT",
+    "pointLight": "LGT",
+    "spotLight": "LGT",
 }
 
 DEFAULT_SUFFIX = "GRP"
@@ -67,6 +72,7 @@ class batchRenamerUi(object):
                                                label="Auto Suffix: ",
                                                columnWidth=(1, 60),
                                                io=False,
+                                               changeCommand=cls.toggleSuffixField,
                                                parent=rename_form_layout)
         padding_label = cmds.text("Padding: ", align="right", width=50, parent=rename_form_layout)
         cls.padding = cmds.intField(width=50,
@@ -136,6 +142,13 @@ class batchRenamerUi(object):
     def delete(cls):
         if cmds.window(cls.WINDOW_NAME, exists=True):
             cmds.deleteUI(cls.WINDOW_NAME, window=True)
+
+    @classmethod
+    def toggleSuffixField(cls, value):
+        if value:
+            cmds.textFieldGrp(cls.suffix_tfg, e=1, en=0)
+        else:
+            cmds.textFieldGrp(cls.suffix_tfg, e=1, en=1)
             
     # This function renames the selected objects using the given values
     @classmethod
@@ -145,8 +158,8 @@ class batchRenamerUi(object):
         prefix_data = cmds.textFieldGrp(cls.prefix_tfg, query=True, text=True)
         padding_data = cmds.intField(cls.padding, query=True, value=True)
         hierarchy_data = cmds.radioButtonGrp(cls.method, query=True, select=True)
+        counter = 1 
 
-        # Selection method 
         if hierarchy_data == 2:
             sel = cmds.ls(sl=True, tr=True)
             children = cmds.listRelatives(sel, ad=True, type='transform')
@@ -155,35 +168,25 @@ class batchRenamerUi(object):
         else: 
             sel = cmds.ls(sl=True)
 
-        # Suffix calculation
-        if cmds.checkBoxGrp(cls.autoSuffix_cbg, query=True, value1=True):
-
-            for obj in sel:
-    
-                sel.sort(key=len, reverse=True)
-    
-                shortName = obj.split("|")[-1]
-
-                children = cmds.listRelatives(obj, children=True, fullPath=True) or []
-                print(children)
-                if len(children) == 1:
-                    child = children[0]
-                    objType = cmds.objectType(child)
-        
-                    suffix_data = SUFFIXES.get(objType, DEFAULT_SUFFIX)
-        else: 
-            suffix_data = cmds.textFieldGrp(cls.suffix_tfg, query=True, text=True)
-
-        counter = 1
         if len(sel) < 1:
             raise RuntimeError("Please select at least one object to rename")
         else:
             for obj in sel:
-                cmds.rename("{0}{1}{2}{3}".format(prefix_data, rename_data, str(counter).zfill(padding_data), suffix_data))
-                counter += 1
+                if cmds.checkBoxGrp(cls.autoSuffix_cbg, query=True, value1=True):
+                    objType = cmds.objectType(obj)
 
-        print("Renamed {0} Objects".format(counter))
-        cmds.select(all=True, hierarchy = True, visible = False, deselect=True)
+                    if objType == "transform":
+                        children = cmds.listRelatives(obj, children=True, ni=True)[0]
+                        objType = cmds.objectType(children)
+                    suffix_data = "_" + SUFFIXES.get(objType, DEFAULT_SUFFIX)
+                else:
+                    suffix_data = cmds.textFieldGrp(cls.suffix_tfg, query=True, text=True)
+
+                cmds.rename("{0}{1}{2}{3}".format(prefix_data, rename_data, str(counter).zfill(padding_data), suffix_data))
+                counter+=1
+
+        print("Renamed {0} Objects".format(len(sel)))
+        cmds.select(cl=True)
         
     # This function searches for a given string and replaces it with another given string
     @classmethod
