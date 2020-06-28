@@ -35,7 +35,7 @@ class batchRenamerUi(object):
 
         main_layout = cmds.columnLayout(adjustableColumn=True, parent=main_window)
 
-        # Method section
+        # Method UI
         method_layout = cmds.formLayout(parent=main_layout)
 
         cls.method = cmds.radioButtonGrp(numberOfRadioButtons=2,
@@ -49,7 +49,7 @@ class batchRenamerUi(object):
 
         cmds.formLayout(method_layout, e=True, af=(cls.method, "top", 0))
 
-        # Rename Section
+        # Rename UI
         rename_layout = cmds.frameLayout(label="Rename", parent=main_layout, bgs=True)
         rename_form_layout = cmds.formLayout(parent=rename_layout, h=60)
         
@@ -94,7 +94,7 @@ class batchRenamerUi(object):
         cmds.formLayout(rename_form_layout, e=True, ac=(cls.padding, "top", 3, cls.name_tfg))
         cmds.formLayout(rename_form_layout, e=True, ac=(cls.padding, "left", 0, padding_label))
 
-        # Search and Replace Section
+        # Search and Replace UI
         replace_layout = cmds.frameLayout(label="Search and Replace", parent=main_layout, bgs=True)
 
         replace_form_layout = cmds.formLayout(parent=replace_layout, h=65)
@@ -114,7 +114,7 @@ class batchRenamerUi(object):
         cmds.formLayout(replace_form_layout, e=True, af=(cls.searchFor_tfg, "left", 0))
         cmds.formLayout(replace_form_layout, e=True, ac=(cls.replaceWith_tfg, "top", 3, cls.searchFor_tfg))
 
-        # Buttons section
+        # Buttons UI
         button_layout = cmds.flowLayout(parent=main_layout)
         rename_btn = cmds.button(label="Rename",
                                  width=170,
@@ -143,6 +143,7 @@ class batchRenamerUi(object):
         if cmds.window(cls.WINDOW_NAME, exists=True):
             cmds.deleteUI(cls.WINDOW_NAME, window=True)
 
+    # This function checks if Auto Suffix is enabled and disables the Suffix input field if so
     @classmethod
     def toggleSuffixField(cls, value):
         if value:
@@ -160,6 +161,7 @@ class batchRenamerUi(object):
         hierarchy_data = cmds.radioButtonGrp(cls.method, query=True, select=True)
         counter = 1 
 
+        # Determines the selection
         if hierarchy_data == 2:
             sel = cmds.ls(sl=True, tr=True)
             children = cmds.listRelatives(sel, ad=True, type='transform')
@@ -185,6 +187,7 @@ class batchRenamerUi(object):
                 cmds.rename("{0}{1}{2}{3}".format(prefix_data, rename_data, str(counter).zfill(padding_data), suffix_data))
                 counter+=1
 
+        # Prints how many objects were renamed and deselects everything 
         print("Renamed {0} Objects".format(len(sel)))
         cmds.select(cl=True)
         
@@ -196,6 +199,7 @@ class batchRenamerUi(object):
         replaceWith_data = cmds.textFieldGrp(cls.replaceWith_tfg, query=True, text=True)
         hierarchy_data = cmds.radioButtonGrp(cls.method, query=True, select=True)
         
+        # Determines the selection
         if hierarchy_data == 2:
             sel = cmds.ls(sl=True, tr=True)
             children = cmds.listRelatives(sel, ad=True, type='transform')
