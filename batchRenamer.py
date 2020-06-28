@@ -187,7 +187,7 @@ class batchRenamerUi(object):
                 cmds.rename("{0}{1}{2}{3}".format(prefix_data, rename_data, str(counter).zfill(padding_data), suffix_data))
                 counter+=1
 
-        # Prints how many objects were renamed and deselects everything 
+        # Prints how many objects were renamed and deselects everything
         print("Renamed {0} Objects".format(len(sel)))
         cmds.select(cl=True)
         
