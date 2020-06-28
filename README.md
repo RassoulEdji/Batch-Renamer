@@ -16,7 +16,7 @@ It is usually found here:
 ```
 C:\Users\<USER>\Documents\maya\<MAYA VERSION>\scripts
 ```
-Now, in Maya, open the script editor and paste in this code: 
+Now, in Maya, open the script editor and paste in this code into a Python executer: 
 ```
 from batchRenamer import batchRenamerUi
 
